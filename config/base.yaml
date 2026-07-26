@@ -1,0 +1,9 @@
+dataset:
+  repo: dair-ai/emotion
+  config: split
+  features:
+    - text
+  target: label
+
+model:
+  repo: microsoft/deberta-v3-small

@@ -1,17 +1,14 @@
 # configs/full_ft.yaml — baseline: all parameters trainable
 
-dataset_name: "dair-ai/emotion"
-text_column: "text"
-label_column: "label"
-num_labels: 2
+num_labels: 6
 max_length: 128
 seed: 42
 
-model_name: "HuggingFaceTB/SmolLM2-360M"
+model_name: microsoft/deberta-v3-small
 
 epochs: 3
 batch_size: 16
 learning_rate: 2e-5          
 
-output_dir: "results/checkpoints/full_ft"
-mlflow_experiment_name: "efficient-fine-tuning-comparison"
+output_dir: results/checkpoints/full_ft
+mlflow_experiment_name: efficient-fine-tuning-comparison

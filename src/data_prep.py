@@ -22,6 +22,7 @@ class DataConfig(BaseModel):
 
 def load_dataset_config() -> DataConfig:
     try:
+        log.info("Reading configuration for Data Processing and validating")
         path = "../config/dataset.yaml"
         with open(path) as f:
             configs = yaml.safe_load(f)

@@ -2,6 +2,7 @@ import argparse
 import time
 
 import mlflow
+from pydantic import BaseModel
 import torch
 import yaml
 from transformers import (
@@ -18,13 +19,33 @@ from src.metrics_utils import (
     count_params,
     track_peak_memory,
 )
+from utils import get_logger
+
+log = get_logger(__file__)
+
+class FullFeatureTraining(BaseModel):
+    num_labels: int
+    max_length: int
+    seed: int
+    model_name: str
+    epochs: int
+    batch_size: int
+    learning_rate: float       
+    output_dir: str
+    mlflow_experiment_name: str
 
 
 def load_config(path):
     """read config from given yaml file"""
-    with open(path) as f:
-        return yaml.safe_load(f)
-
+    try:
+        log.info("Reading configuration for full feature training and validating")
+        path = "../config/full_ft.yaml"
+        with open(path) as f:
+            config = yaml.safe_load(f)
+        return FullFeatureTraining(**config)
+    except Exception as e:
+        log.error(f"Error while loading full feature training config: {str(e)}")
+        raise Exception(e) from e
 
 def parse_args():
     p = argparse.ArgumentParser()
@@ -40,26 +61,20 @@ def build_model_full(cfg: dict):
     return model
 
 
-def create_dataset():
-    dp = DataProcessing()
-    dataset = dp.load_dataset()
-    train, validation, test = dp.split_dataset(dataset=dataset)
-    tokenized_train, tokenized_validation = dp.tokenize_dataset(train, validation)
-
-    return tokenized_train, tokenized_validation, test
-
-
 def main():
     args = parse_args()
     cfg = load_config(args.config)
 
     torch.manual_seed(cfg.get("seed", 42))
 
+    # --- Setup experiment ---
     mlflow.set_experiment(
         experiment_name=cfg.get(
             "mlflow_experiment_name", "efficient-fine-tuning-comparison"
         )
     )
+
+    
     with mlflow.start_run(run_name="full features"):
         mlflow.log_params(
             {
@@ -72,12 +87,19 @@ def main():
             }
         )
 
+        # --- Setup Model and Tokenizer
         tokenizer = AutoTokenizer.from_pretrained(cfg["model_name"])
         model = build_model_full(cfg=cfg)
 
         trainable, total, pct = count_params(model)
 
-        train_data, validation_data, test_data = create_dataset()
+        # --- Setup data ----
+        data_processor = DataProcessing()
+        raw_dataset = data_processor.load_dataset()
+        train_data, validation_data, test_data = data_processor.split_dataset(
+            dataset = raw_dataset,
+            tokenizer = tokenizer
+        )
 
         mlflow.log_metrics(
             {"trainable_params": trainable, "total_params": total, "trainable_pct": pct}

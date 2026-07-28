@@ -55,17 +55,15 @@ config_files: dict = {
 
 def load_config() -> SysConfig:
     config: dict = {}
+    config_dir = Path(__file__).resolve().parent.parent / "config"
+    log.info(f"Loading config from: {str(config_dir)}")
 
     try:
-        for k, config_path in config_files.items():
-            log.info(
-                f"Loading config from: {str(Path(__file__).resolve().parent.parent)}"
-            )
-            config_path = (
-                Path(__file__).resolve().parent.parent / "config" / config_path
-            )
+        for k, config_file in config_files.items():
+            
+            config_file = (config_dir / config_file)
 
-            with open(config_path, "r") as file:
+            with open(config_file, "r") as file:
                 raw_config = yaml.safe_load(file) or {}
 
             config[k] = raw_config

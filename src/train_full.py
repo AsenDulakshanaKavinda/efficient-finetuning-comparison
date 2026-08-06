@@ -2,9 +2,9 @@ import argparse
 import time
 
 import mlflow
-from pydantic import BaseModel
 import torch
 import yaml
+from pydantic import BaseModel
 from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
@@ -35,7 +35,7 @@ class FullFeatureTraining(BaseModel):
     mlflow_experiment_name: str
 
 
-def load_config(path):
+def load_config():
     """read config from given yaml file"""
     try:
         log.info("Reading configuration for full feature training and validating")
@@ -44,7 +44,7 @@ def load_config(path):
             config = yaml.safe_load(f)
         return FullFeatureTraining(**config)
     except Exception as e:
-        log.error(f"Error while loading full feature training config: {str(e)}")
+        log.error(f"Error while loading full feature training config: {e!s}")
         raise Exception(e) from e
 
 def parse_args():
@@ -53,25 +53,25 @@ def parse_args():
     return p.parse_args()
 
 
-def build_model_full(cfg: dict):
+def build_model_full(cfg: FullFeatureTraining):
     model = AutoModelForSequenceClassification.from_pretrained(
-        pretrained_model_name_or_path=cfg["model_name"], 
-        num_labels=cfg["num_labels"]
+        pretrained_model_name_or_path=cfg.model_name, 
+        num_labels=cfg.num_labels
     )
     return model
 
 
 def main():
-    args = parse_args()
-    cfg = load_config(args.config)
+    # args = parse_args()
+    # cfg = load_config(args.config)
 
-    torch.manual_seed(cfg.get("seed", 42))
+    cfg = load_config()
+
+    torch.manual_seed(cfg.seed)
 
     # --- Setup experiment ---
     mlflow.set_experiment(
-        experiment_name=cfg.get(
-            "mlflow_experiment_name", "efficient-fine-tuning-comparison"
-        )
+        experiment_name=cfg.mlflow_experiment_name
     )
 
     
@@ -79,16 +79,16 @@ def main():
         mlflow.log_params(
             {
                 "method": "full features",
-                "model_name": cfg["model_name"],
-                "epochs": cfg["epochs"],
-                "learning_rate": cfg["learning_rate"],
-                "batch_size": cfg["batch_size"],
-                "seed": cfg.get("seed", 42),
+                "model_name": cfg.model_name,
+                "epochs": cfg.epochs,
+                "learning_rate": cfg.learning_rate,
+                "batch_size": cfg.batch_size,
+                "seed": cfg.seed,
             }
         )
 
         # --- Setup Model and Tokenizer
-        tokenizer = AutoTokenizer.from_pretrained(cfg["model_name"])
+        tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
         model = build_model_full(cfg=cfg)
 
         trainable, total, pct = count_params(model)
@@ -109,11 +109,11 @@ def main():
 
         # --- Training arguments ---
         training_args = TrainingArguments(
-            output_dir=cfg["output_dir"],
-            num_train_epochs=cfg["epochs"],
-            per_device_train_batch_size=cfg["batch_size"],
-            per_device_eval_batch_size=cfg["batch_size"],
-            learning_rate=cfg["learning_rate"],
+            output_dir=cfg.output_dir,
+            num_train_epochs=cfg.epochs,
+            per_device_train_batch_size=cfg.batch_size,
+            per_device_eval_batch_size=cfg.batch_size,
+            learning_rate=cfg.learning_rate,
             eval_strategy="epoch",
             save_strategy="epoch",
             logging_steps=10,
@@ -158,8 +158,8 @@ def main():
 
         # Save only the adapter weights, not the full model — this is the
         # storage-efficiency story you want in the write-up.
-        model.save_adapter(f"{cfg['output_dir']}/full_ft", "full_ft")
-        mlflow.log_artifacts(f"{cfg['output_dir']}/full_ft", artifact_path="full_ft")
+        model.save_adapter(f"{cfg.output_dir}/full_ft", "full_ft")
+        mlflow.log_artifacts(f"{cfg.output_dir}/full_ft", artifact_path="full_ft")
 
 
 if __name__ == "__main__":

@@ -1,8 +1,10 @@
 import time
-import torch
 from contextlib import contextmanager
+
+import torch
+from sklearn.metrics import accuracy_score, f1_score
 from transformers import AutoModelForSequenceClassification
-from sklearn.metrics import f1_score, accuracy_score
+
 
 def count_params(model: AutoModelForSequenceClassification)-> tuple[int, int, float]:
     """ Return (trainable params, total params, trainable params percentage)"""

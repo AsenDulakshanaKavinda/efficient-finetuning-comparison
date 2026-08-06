@@ -28,7 +28,7 @@ def load_dataset_config() -> DataConfig:
             configs = yaml.safe_load(f)
         return DataConfig(**configs)
     except Exception as e:
-        log.error(f"Error while loading dataset config: {str(e)}")
+        log.error(f"Error while loading dataset config: {e!s}")
         raise Exception(e) from e
 
 
@@ -51,7 +51,7 @@ class DataProcessing:
             dataset.save_to_disk(dataset_dict_path=self.raw_dataset_path)
         except Exception as e:
             error: str = (
-                f"Error while downloading {self.dataset_repo} dataset: {str(e)}"
+                f"Error while downloading {self.dataset_repo} dataset: {e!s}"
             )
             log.error(error)
             raise DataProcessingException(e) from e
@@ -64,7 +64,7 @@ class DataProcessing:
             return load_from_disk(dataset_path=self.raw_dataset_path)
         except Exception as e:
             error: str = (
-                f"Error while loading dataset from {self.raw_dataset_path}: {str(e)}"
+                f"Error while loading dataset from {self.raw_dataset_path}: {e!s}"
             )
             log.error(error)
             raise DataProcessingException(e) from e
@@ -92,7 +92,7 @@ class DataProcessing:
                 raise ValueError(error)
 
         except Exception as e:
-            error: str = f"Error while evaluation dataset: {str(e)}"
+            error: str = f"Error while evaluation dataset: {e!s}"
             log.error(error)
             raise DataProcessingException(error) from e
 
@@ -113,6 +113,6 @@ class DataProcessing:
             )
             return tokenized_train, tokenized_validation, dataset["test"]
         except Exception as e:
-            error = f"Error while splitting dataset: {str(e)}"
+            error = f"Error while splitting dataset: {e!s}"
             log.error(error)
             raise DataProcessingException(error) from e

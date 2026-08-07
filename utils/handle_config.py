@@ -56,7 +56,7 @@ config_files: dict = {
 def load_config() -> SysConfig:
     config: dict = {}
     config_dir = Path(__file__).resolve().parent.parent / "config"
-    log.info(f"Loading config from: {str(config_dir)}")
+    log.info(f"Loading config from: {config_dir!s}")
 
     try:
         for k, config_file in config_files.items():
@@ -72,10 +72,10 @@ def load_config() -> SysConfig:
 
         return sys_config
     except ValidationError as ve:
-        log.error(f"Error while loading config: {str(ve)}")
+        log.error(f"Error while loading config: {ve!s}")
         raise ValidationError(ve) from ve
     except Exception as e:
-        log.error(f"Error while loading config: {str(e)}")
+        log.error(f"Error while loading config: {e!s}")
         raise Exception(e) from e
 
 

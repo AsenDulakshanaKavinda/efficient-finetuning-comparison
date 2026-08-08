@@ -1,0 +1,27 @@
+# configs/lora.yaml
+
+dataset_name: "SetFit/sms_spam"
+text_column: "text"
+label_column: "label"
+num_labels: 2
+max_length: 128
+val_split: 0.1
+test_split: 0.1
+seed: 42
+
+model_name: "HuggingFaceTB/SmolLM2-360M"
+
+epochs: 3
+batch_size: 16
+learning_rate: 2e-4          # LoRA typically wants a higher LR than full FT —
+                              # only a small adapter is updating, so it can
+                              # move faster without destabilizing the frozen base
+
+# --- LoRA-specific ---
+lora_r: 8                    
+lora_alpha: 16                # commonly 2x the rank
+lora_dropout: 0.05
+lora_target_modules: ["q_proj", "v_proj"]
+
+output_dir: "results/checkpoints/lora"
+mlflow_experiment_name: "efficient-finetuning-comparison"

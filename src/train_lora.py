@@ -85,7 +85,7 @@ def build_model_with_lora(cfg: LoraTraining):
 
 def main():
     args = parse_args()
-    cfg = load_config(args)
+    cfg = load_config(args.config)
 
     torch.manual_seed(cfg.seed)
 

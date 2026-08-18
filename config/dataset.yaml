@@ -1,6 +1,6 @@
 dataset_repo: dair-ai/emotion
 dataset_name: split
-raw_dataset_path: ../data/raw
+raw_dataset_path: data/raw/
 features:
   - text
 target: label

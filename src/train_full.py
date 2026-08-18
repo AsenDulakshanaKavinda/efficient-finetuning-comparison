@@ -39,7 +39,7 @@ def load_config():
     """read config from given yaml file"""
     try:
         log.info("Reading configuration for full feature training and validating")
-        path = "../config/full_ft.yaml"
+        path = "config/full_ft.yaml"
         with open(path) as f:
             config = yaml.safe_load(f)
         return FullFeatureTraining(**config)
@@ -126,10 +126,10 @@ def main():
             args=training_args,
             train_dataset=train_data,
             eval_dataset=validation_data,
-            tokenizer=tokenizer,
+            processing_class=tokenizer,
         )
 
-        # --- Training time + peak memory ---
+        # --- Training time + peak memory --_
         torch.cuda.reset_peak_memory_stats()
         start = time.time()
         with track_peak_memory() as mem_tracker:

@@ -1,5 +1,6 @@
 from pathlib import Path
-
+import os
+import shutil
 import yaml
 from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
 from pydantic import BaseModel
@@ -23,7 +24,7 @@ class DataConfig(BaseModel):
 def load_dataset_config() -> DataConfig:
     try:
         log.info("Reading configuration for Data Processing and validating")
-        path = "../config/dataset.yaml"
+        path = "config/dataset.yaml"
         with open(path) as f:
             configs = yaml.safe_load(f)
         return DataConfig(**configs)
@@ -40,6 +41,10 @@ class DataProcessing:
         self.raw_dataset_path: Path = Path(self.cfg.raw_dataset_path)
         self.features = self.cfg.features
         self.target = self.cfg.target
+
+        if self.raw_dataset_path.exists():
+            shutil.rmtree(self.raw_dataset_path)
+        os.makedirs(self.raw_dataset_path, exist_ok=True)
 
     def download_dataset(self):
         # download dataset from the HF

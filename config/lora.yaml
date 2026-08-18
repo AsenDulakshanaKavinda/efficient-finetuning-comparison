@@ -11,7 +11,7 @@ seed: 42
 
 model_name: "HuggingFaceTB/SmolLM2-360M"
 
-epochs: 3
+epochs: 1
 batch_size: 16
 learning_rate: 2e-4          # LoRA typically wants a higher LR than full FT —
                               # only a small adapter is updating, so it can

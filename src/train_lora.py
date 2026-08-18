@@ -1,5 +1,6 @@
 import argparse
 from datetime import time
+import os
 
 import mlflow
 import torch
@@ -46,11 +47,10 @@ class LoraTraining(BaseModel):
     mlflow_experiment_name: str
     
 
-def load_config() -> LoraTraining:
+def load_config(path: str) -> LoraTraining:
     """ read config from giver yaml file. """
     try:
         log.info("Reading configuration for LORA training and validating")
-        path = "../config/lora.yaml"
         with open(path) as f:
             config = yaml.safe_load(f)
         return LoraTraining(**config)
@@ -84,8 +84,8 @@ def build_model_with_lora(cfg: LoraTraining):
     return model
 
 def main():
-    # args = parse_args()
-    cfg = load_config()
+    args = parse_args()
+    cfg = load_config(args)
 
     torch.manual_seed(cfg.seed)
 
@@ -133,6 +133,8 @@ def main():
             logging_steps=10,
             load_best_model_at_end=True,
             report_to=[],  # logging to MLflow manually for consistency across all 4 scripts
+            fp16=False,             # Disable FP16 (or use bf16=True if supported)
+            max_grad_norm=1.0,      # Prevents exploding gradients
         )
 
         trainer = Trainer(
@@ -140,7 +142,7 @@ def main():
             args=training_args,
             train_dataset=train_data,
             eval_dataset=validation_data,
-            tokenizer=tokenizer,
+            processing_class=tokenizer,
         )
 
         # --- Training time + peak memory ---
@@ -169,7 +171,12 @@ def main():
         mlflow.log_metric("avg_inference_latency_ms", avg_latency_ms)
         print(f"Avg inference latency: {avg_latency_ms:.2f} ms/sample")
 
-        # Save only the adapter weights, not the lora model — this is the
-        # storage-efficiency story you want in the write-up.
-        model.save_adapter(f"{cfg.output_dir}/lora_ft", "lora_ft")
+        # --- Save the trained model ---
+        save_path = f"{cfg.output_dir}/lora_ft"
+        os.makedirs(save_path, exist_ok=True)
+
+        # Save 
+        model.save_pretrained(f"{cfg.output_dir}/lora_ft")
+        tokenizer.save_pretrained(f"{cfg.output_dir}/lora_ft")
         mlflow.log_artifacts(f"{cfg.output_dir}/lora_ft", artifact_path="lora_ft")
+

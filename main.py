@@ -2,6 +2,7 @@ import argparse
 
 import yaml
 from src.train_full import main as train_full
+from src.train_lora import main as train_lora
 # from utils.handle_logging import get_logger
 
 # log = get_logger(__file__)
@@ -24,7 +25,8 @@ def main():
     # cfg = load_config(path= "./config/full_ft.yaml")
     # a = parse_args()    
     # print(a.config)
-    train_full()
+    # train_full()
+    train_lora()
 
 
 if __name__ == "__main__":

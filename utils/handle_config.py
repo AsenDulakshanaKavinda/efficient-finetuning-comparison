@@ -27,7 +27,19 @@ class BaseConfig(BaseModel):
     model: ModelConfig
 
 
-class FullFtConfig(BaseModel): ...
+class FullFtConfig(BaseModel): 
+    num_labels: int
+    max_length: int
+    seed: int
+
+    model_name: str
+
+    epochs: int
+    batch_size: int
+    learning_rate: 2e-5          
+
+    output_dir: str
+    mlflow_experiment_name: str
 
 
 class LoraConfig(BaseModel): ...

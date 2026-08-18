@@ -1,4 +1,5 @@
 import argparse
+import os
 import time
 
 import mlflow
@@ -35,11 +36,10 @@ class FullFeatureTraining(BaseModel):
     mlflow_experiment_name: str
 
 
-def load_config():
+def load_config(path: str):
     """read config from given yaml file"""
     try:
         log.info("Reading configuration for full feature training and validating")
-        path = "config/full_ft.yaml"
         with open(path) as f:
             config = yaml.safe_load(f)
         return FullFeatureTraining(**config)
@@ -94,6 +94,7 @@ def main():
 
         # --- Setup data ----
         data_processor = DataProcessing()
+        data_processor.download_dataset()
         raw_dataset = data_processor.load_dataset()
         train_data, validation_data, test_data = data_processor.split_dataset(
             dataset = raw_dataset,
@@ -118,6 +119,8 @@ def main():
             logging_steps=10,
             load_best_model_at_end=True,
             report_to=[],
+            fp16=False,             # Disable FP16 (or use bf16=True if supported)
+            max_grad_norm=1.0,      # Prevents exploding gradients
         )
 
         # -- Trainer ---
@@ -155,10 +158,16 @@ def main():
         mlflow.log_metric("avg_inference_latency_ms", avg_latency_ms)
         print(f"Avg inference latency: {avg_latency_ms:.2f} ms/sample")
 
-        # Save only the adapter weights, not the full model — this is the
-        # storage-efficiency story you want in the write-up.
-        model.save_adapter(f"{cfg.output_dir}/full_ft", "full_ft")
-        mlflow.log_artifacts(f"{cfg.output_dir}/full_ft", artifact_path="full_ft")
+        # --- Save the trained model ---
+        save_path = f"{cfg.output_dir}/full_ft"
+        os.makedirs(save_path, exist_ok=True)
+
+        # Save the full model architecture and weights and tokenizer
+        model.save_pretrained(save_path)
+        tokenizer.save_pretrained(save_path)
+
+        # Log the full directory artifacts to MLflow
+        mlflow.log_artifacts(save_path, artifact_path="full_ft")
 
 
 if __name__ == "__main__":

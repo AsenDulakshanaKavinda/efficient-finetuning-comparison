@@ -112,11 +112,12 @@ class DataProcessing:
             log.info(
                 "Splitting and tokenizing dataset into train, validation and test datasets"
             )
-            tokenized_train = dataset["test"].map(tokenization_fn, batched=True)
+            tokenized_train = dataset["train"].map(tokenization_fn, batched=True)
             tokenized_validation = dataset["validation"].map(
                 tokenization_fn, batched=True
             )
-            return tokenized_train, tokenized_validation, dataset["test"]
+            tokenized_test = dataset["test"].map(tokenization_fn, batched=True)
+            return tokenized_train, tokenized_validation, tokenized_test
         except Exception as e:
             error = f"Error while splitting dataset: {e!s}"
             log.error(error)

@@ -88,7 +88,7 @@ def benchmark_latency(model, dataset, num_samples = 50, num_warmup = 4, device =
             elapsed_ms = (time.perf_counter() - start) * 1000
 
             if i >= num_warmup:
-                time.append(elapsed_ms)
+                times.append(elapsed_ms)
 
     return sum(times) / len(times)
 

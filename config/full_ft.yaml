@@ -6,7 +6,7 @@ seed: 42
 
 model_name: microsoft/deberta-v3-small
 
-epochs: 3
+epochs: 1
 batch_size: 16
 learning_rate: 2e-5          
 

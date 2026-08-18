@@ -1,7 +1,7 @@
 import argparse
 
 import yaml
-
+from src.train_full import main as train_full
 # from utils.handle_logging import get_logger
 
 # log = get_logger(__file__)
@@ -22,8 +22,9 @@ def main():
     # log.info("Hello from efficient-fine-tuning-comparison!")
     # print(sys_config.base_config.model.repo)
     # cfg = load_config(path= "./config/full_ft.yaml")
-    a = parse_args()    
-    print(a.config)
+    # a = parse_args()    
+    # print(a.config)
+    train_full()
 
 
 if __name__ == "__main__":

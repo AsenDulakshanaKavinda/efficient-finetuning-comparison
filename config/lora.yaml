@@ -3,7 +3,7 @@
 dataset_name: SetFit/sms_spam
 text_column: text
 label_column: label
-num_labels: 2
+num_labels: 6
 max_length: 128
 val_split: 0.1
 test_split: 0.1
@@ -21,7 +21,9 @@ learning_rate: 2e-4          # LoRA typically wants a higher LR than full FT —
 lora_r: 8                    
 lora_alpha: 16                # commonly 2x the rank
 lora_dropout: 0.05
-lora_target_modules: ["q_proj", "v_proj"]
+lora_target_modules: 
+  - query
+  - value
 
 output_dir: results/checkpoints/lora
 mlflow_experiment_name: efficient-finetuning-comparison

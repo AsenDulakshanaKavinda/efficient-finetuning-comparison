@@ -1,5 +1,5 @@
 import argparse
-from datetime import time
+import time
 import os
 
 import mlflow

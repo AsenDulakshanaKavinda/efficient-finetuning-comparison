@@ -9,7 +9,7 @@ val_split: 0.1
 test_split: 0.1
 seed: 42
 
-model_name: microsoft/deberta-v3-small
+model_name: google-bert/bert-base-uncased
 
 epochs: 1
 batch_size: 16

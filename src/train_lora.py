@@ -108,6 +108,7 @@ def main():
         tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
 
         data_processor = DataProcessing()
+        data_processor.download_dataset()
         raw_dataset = data_processor.load_dataset()
         train_data, validation_data, test_data = data_processor.split_dataset(
             dataset = raw_dataset,

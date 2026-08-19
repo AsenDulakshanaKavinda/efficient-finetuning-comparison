@@ -3,6 +3,7 @@ import argparse
 import yaml
 from src.train_full import main as train_full
 from src.train_lora import main as train_lora
+from src.train_qlora import main as train_qlora
 # from utils.handle_logging import get_logger
 
 # log = get_logger(__file__)
@@ -26,7 +27,9 @@ def main():
     # a = parse_args()    
     # print(a.config)
     # train_full()
-    train_lora()
+    # train_lora()
+    train_qlora()
+
 
 
 if __name__ == "__main__":
